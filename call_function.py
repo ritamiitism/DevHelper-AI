@@ -28,7 +28,27 @@ function_map: dict[str, Callable[..., str]]={
 
 # The sandbox the agent is allowed to touch. The LLM never sees this value:
 # we inject it ourselves, so the model can't point the tools somewhere else.
+# Default preserves the original CLI behaviour (operates on ./calculator).
+# Use set_working_directory() to point the agent at another project root
+# (e.g. a temporary directory holding an uploaded ZIP extraction).
 WORKING_DIRECTORY="./calculator"
+
+
+def get_working_directory() -> str:
+    """Return the directory the agent tools are currently sandboxed to."""
+    return WORKING_DIRECTORY
+
+
+def set_working_directory(path: str) -> None:
+    """Point the agent sandbox at a different project root.
+
+    The value is injected into every tool call, so the model can never
+    override it. Kept as a module-level setting so the existing
+    call_function(function_call, verbose) signature stays unchanged.
+    """
+    global WORKING_DIRECTORY
+    WORKING_DIRECTORY=path
+
 
 
 def call_function(function_call: types.FunctionCall, verbose: bool = False) -> types.Content:
